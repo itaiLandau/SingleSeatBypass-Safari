@@ -43,7 +43,9 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
   // 1. Get active tab
   let tab;
   try {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    // Safari uses browser.tabs.query
+    const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+    const tabs = await browserAPI.tabs.query({ active: true, currentWindow: true });
     if (!tabs || tabs.length === 0) {
       appendLog('No active tab found. Ensure you are on a ticketing page.', 'error');
       return;
@@ -63,11 +65,12 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
   appendLog(`Active settings: SingleSeat=${bypassSingle}, DoubleSeat=${bypassDouble}, Handicap=${bypassHandicap}`, 'info');
   appendLog('Injecting bypass script into main page context...', 'info');
 
-  // 3. Inject script in MAIN execution world (to access Angular __ngContext__)
+  // 3. Inject script in MAIN execution world
   try {
-    const results = await chrome.scripting.executeScript({
+    const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+    const results = await browserAPI.scripting.executeScript({
       target: { tabId: tab.id },
-      world: 'MAIN', // CRITICAL: Run in page's main context, not the isolated sandbox
+      world: 'MAIN', // CRITICAL: Run in page's main context
       func: (config) => {
         const diagnostics = [];
         const log = (msg, success = true) => diagnostics.push({ msg, type: success ? 'success' : 'warn' });
@@ -112,7 +115,6 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
             
             if (config.bypassDouble) {
               platformService.params.isDoubleSeatValidate = false;
-              // If seatValidity or doubleSeatValidity exist directly, force them
               if ('seatValidity' in platformService.params) {
                 platformService.params.seatValidity = true;
               }
@@ -130,25 +132,22 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
             logInfo('Scanning for handicap verification structures...');
             let handicapPatched = false;
             
-            // 1. Try to find platform modals and patch openHandicapAlert
             elements.forEach(el => {
               if (!el.__ngContext__) return;
               el.__ngContext__.forEach(item => {
                 if (!item || typeof item !== 'object') return;
                 
-                // Inspect platform modals
                 if (item.platform && item.platform.modals && item.platform.modals.openHandicapAlert) {
                   const originalModal = item.platform.modals.openHandicapAlert;
                   item.platform.modals.openHandicapAlert = function() {
                     logInfo('Intercepted openHandicapAlert() - automatically approving handicap ID requirement.');
                     return {
-                      result: Promise.resolve(true) // Resolve automatically to true (proceed)
+                      result: Promise.resolve(true)
                     };
                   };
                   handicapPatched = true;
                 }
                 
-                // Inspect items directly for modals property
                 if (item.modals && item.modals.openHandicapAlert) {
                   item.modals.openHandicapAlert = function() {
                     logInfo('Intercepted modals.openHandicapAlert() - automatically approving handicap ID.');
@@ -161,17 +160,14 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
               });
             });
 
-            // 2. Try to find the seat selection service and override the handicap attribute
             elements.forEach(el => {
               if (!el.__ngContext__) return;
               el.__ngContext__.forEach(item => {
                 if (item && item.onSelect && item.plan) {
-                  // Intercept seat selection to automatically strip handicap requirements if present
                   const originalOnSelect = item.onSelect.bind(item);
                   item.onSelect = function(seat) {
                     if (seat && seat.venueSeatAttributeId) {
                       logInfo(`Intercepted onSelect for Seat ${seat.rowLabel}-${seat.label}. Temporarily disabling handicap check.`);
-                      // Backup and strip temporarily to bypass angular check, then restore
                       const originalAttr = seat.venueSeatAttributeId;
                       seat.venueSeatAttributeId = null; 
                       originalOnSelect(seat);
@@ -192,7 +188,7 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
             }
           }
 
-          // Force view state refresh (Change Detection) across active elements
+          // Force view state refresh
           elements.forEach(el => {
             if (el.__ngContext__) {
               el.__ngContext__.forEach(item => {
@@ -219,11 +215,9 @@ document.getElementById('btn-bypass').addEventListener('click', async () => {
       args: [{ bypassSingle, bypassDouble, bypassHandicap }]
     });
 
-    // 4. Render logs returned from the page context
     if (results && results[0] && results[0].result) {
       const response = results[0].result;
       
-      // Print logs step by step
       response.logs.forEach(item => {
         appendLog(item.msg, item.type);
       });

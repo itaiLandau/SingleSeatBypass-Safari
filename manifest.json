@@ -3,8 +3,19 @@
   "name": "Single Seat Bypass Pro",
   "version": "1.0",
   "description": "Bypass single seat, double seat, and handicap restrictions on Angular booking websites.",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "Single Seat Bypass Pro"
+  },
+  "background": {
+    "service_worker": "background.js"
   }
 }
