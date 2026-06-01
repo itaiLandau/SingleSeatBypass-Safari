@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Seat Bypass Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-glow"></div>
+      <h1 class="logo-title">SeatBypass <span class="badge-pro">PRO</span></h1>
+      <p class="logo-subtitle">Angular Ticketing Restriction Bypass</p>
+    </header>
+
+    <!-- Main Controller Card -->
+    <main class="main-card">
+      
+      <!-- Option Switches -->
+      <section class="options-group">
+        <h2 class="section-title">Active Bypass Strategies</h2>
+        
+        <label class="switch-container">
+          <div class="switch-label-group">
+            <span class="switch-title">Single Seat Rules</span>
+            <span class="switch-description">Allows leaving isolated single seats empty</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="bypass-single" checked>
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <label class="switch-container">
+          <div class="switch-label-group">
+            <span class="switch-title">Double Seat Check</span>
+            <span class="switch-description">Disables adjacent double seat validation checks</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="bypass-double" checked>
+            <span class="slider"></span>
+          </div>
+        </label>
+
+        <label class="switch-container">
+          <div class="switch-label-group">
+            <span class="switch-title">Handicap ID Bypass</span>
+            <span class="switch-description">Bypasses verification popups on disabled seats</span>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="bypass-handicap">
+            <span class="slider"></span>
+          </div>
+        </label>
+      </section>
+
+      <!-- Action Button -->
+      <div class="action-wrapper">
+        <button id="btn-bypass" class="btn-primary">
+          <span class="btn-glow"></span>
+          <span class="btn-text">⚡ Inject Bypass Engine</span>
+        </button>
+      </div>
+
+      <!-- Realtime Output Console -->
+      <section class="console-section">
+        <div class="console-header">
+          <span class="console-dot red"></span>
+          <span class="console-dot yellow"></span>
+          <span class="console-dot green"></span>
+          <span class="console-title">Diagnostic Terminal</span>
+          <button id="btn-clear" class="btn-clear-logs" title="Clear Logs">🗑️</button>
+        </div>
+        <div id="terminal-logs" class="terminal-body">
+          <div class="log-line log-waiting"><span class="log-prefix">System:</span> Ready to initialize. Select options and press Inject.</div>
+        </div>
+      </section>
+      
+    </main>
+
+    <!-- Brief usage instructions -->
+    <footer class="app-footer">
+      <p class="guide-text"><strong>How to use:</strong> Select your seats on the page, click the extension icon, adjust parameters, and click <strong>Inject</strong>. Then click the ticketing platform's <strong>Next/Proceed</strong> button.</p>
+    </footer>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
